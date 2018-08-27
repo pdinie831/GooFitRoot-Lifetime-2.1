@@ -1,0 +1,328 @@
+#include <goofit/PDFs/mypdf/BernsteinPdf.h>
+#include <goofit/Variable.h>
+
+namespace GooFit {
+
+ __device__ fptype device_factorial(fptype enne, fptype kappa){
+ 
+        fptype factor=1.;
+        for(float i = 1; i <=kappa; ++i) {
+          factor *= (enne+1-i)/i; 
+        }	 
+ 
+       return factor;
+}
+
+__device__ fptype device_Bernstein(fptype *evt, fptype *p, unsigned int *indices) {
+    // Structure is nP lowestdegree c1 c2 c3 nO o1
+
+    int numParams = (indices[0]) ;
+    int maxDegree = (indices[1]);
+
+    fptype x   = evt[(indices[2 + (indices[0])])];
+    fptype ret = 0;
+    fptype integret = 0;
+    fptype bernkn = 0;
+    fptype integbernkn = 0;
+    int ipar=2;
+    fptype ifactni=1;
+    fptype ifactik=1;
+    fptype xmin=p[(indices[numParams-1])];
+    fptype xmax=p[(indices[numParams])];
+    x=(x-xmin)/(xmax-xmin);
+//     printf("BernsteinPdf => limit xmin= %f xmax= %f\n",xmin,xmax);
+//     return 0;
+
+
+//     for(int i = 2; i < numParams; ++i) {
+//         ret += (p[(indices[i])]) * pow(x, lowestDegree + i - 2);
+//     }
+    
+      float k;
+      float i;
+      for(k = 0; k <=maxDegree; ++k) {
+      bernkn = 0;
+      integbernkn = 0;
+       for(i = k; i <=maxDegree ; ++i) {
+// n!/(i!(n-i)!)
+//         ifactni=1;
+//         for(float l = 1; l <=i; ++l) {
+//           ifactni *= (maxDegree+1-l)/l; 
+//         }	 
+
+        ifactni =  device_factorial(maxDegree,i);
+// i!/(k!(i-k)!)
+//         ifactik=1;
+//         for(float l = 1; l <=k; ++l) {
+//           ifactik *= (i+1-l)/l; 
+//         }	
+ 
+        ifactik =  device_factorial(i,k);
+//
+        if (ifactni==0 || ifactik==0){
+	 printf("Error in BernsteinPdf => ifactni = %d ifactik= %d\n",ifactni,ifactik);
+         return 0;
+	} 
+        bernkn      += ifactni*ifactik*pow(-1,i-k)*pow(x, i );
+        integbernkn += ifactni*ifactik*pow(-1,i-k)/(i+1);
+//       printf("BernsteinPdf => %f integral = %f k=%d i=%d numparam=%d maxDegree=%d par=%f ni=%f nk=%f\n",bernkn,integbernkn,k,i,numParams,maxDegree,(p[(indices[ipar])]),ifactni,ifactik);
+       }
+       if (ipar>numParams-1){
+        printf("Error in BernsteinPdf => ipar=%d > numParams=%d\n",ipar,numParams);
+        return 0;
+       }
+       ret      += (p[(indices[ipar])]) * bernkn;
+       integret += (p[(indices[ipar])]) * integbernkn;
+//       printf("BernsteinPdf => %f integral = %f k=%d numparam=%d par=%f\n",ret,integret,k,numParams,(p[(indices[ipar])]));
+       ipar++;
+      }
+
+//       printf("BernsteinPdf => %f int = %f\n",ret,integret);
+    return ret/integret;
+//    return 0.;
+}
+
+/* __device__ fptype device_OffsetBernstein(fptype *evt, fptype *p, unsigned int *indices) {
+    int numParams    = (indices[0]);
+    int lowestDegree = (indices[1]);
+
+    fptype x = evt[(indices[2 + numParams])];
+    x -= (p[(indices[numParams])]);
+    fptype ret = 0;
+
+    for(int i = 2; i < numParams; ++i) {
+        ret += (p[(indices[i])]) * pow(x, lowestDegree + i - 2);
+    }
+
+    return ret*ret;
+}
+*/
+/* __device__ fptype device_MultiBernstein(fptype *evt, fptype *p, unsigned int *indices) {
+    // Structure is nP, maxDegree, offset1, offset2, ..., coeff1, coeff2, ..., nO, o1, o2, ...
+
+    int numObservables = (indices[(indices[0]) + 1]);
+    int maxDegree      = (indices[1]) + 1;
+    // Only appears in construction (maxDegree + 1) or (x > maxDegree), so
+    // may as well add the one and use >= instead.
+
+    // Technique is to iterate over the full n-dimensional box, skipping matrix elements
+    // whose sum of indices is greater than maxDegree. Notice that this is increasingly
+    // inefficient as n grows, since a larger proportion of boxes will be skipped.
+    int numBoxes = 1;
+    
+
+    for(int i = 0; i < numObservables; ++i)
+        numBoxes *= maxDegree;
+
+    int coeffNumber = 2 + numObservables; // Index of first coefficient is 2 + nO, not 1 + nO, due to maxDegree. (nO
+                                          // comes from offsets.)
+    fptype ret = (p[(indices[coeffNumber++])]); // Coefficient of constant term.
+    fptype intg= ret*4*atan2(0.0, -1.0);
+
+    for(int i = 1; i < numBoxes;
+        ++i) { // Notice skip of inmost 'box' in the pyramid, corresponding to all powers zero, already accounted for.
+        fptype currTerm  = 1;
+        int currIndex    = i;
+        int sumOfIndices = 0;
+	fptype currIntg  = 1;
+        fptype x1        = 0;
+        fptype x2        = 0;
+
+        // if ((gpuDebug & 1) && (THREADIDX == 50) && (BLOCKIDX == 3))
+        // if ((BLOCKIDX == internalDebug1) && (THREADIDX == internalDebug2))
+        // if ((1 > (int) floor(0.5 + evt[8])) && (gpuDebug & 1) && (paramIndices + debugParamIndex == indices))
+        // printf("[%i, %i] Start box %i %f %f:\n", BLOCKIDX, THREADIDX, i, ret, evt[8]);
+        for(int j = 0; j < numObservables; ++j) {
+            fptype x      = (evt[(indices[2 + (indices[0]) + j])]); // x, y, z...
+//            fptype offset = (p[(indices[2 + j])]);                          // x0, y0, z0...
+//            x -= offset;
+            int currPower = currIndex % maxDegree;
+            currIndex /= maxDegree;
+            currTerm *= pow(x, currPower);
+            sumOfIndices += currPower;
+            // if ((gpuDebug & 1) && (THREADIDX == 50) && (BLOCKIDX == 3))
+            // if ((BLOCKIDX == internalDebug1) && (THREADIDX == internalDebug2))
+            // if ((1 > (int) floor(0.5 + evt[8])) && (gpuDebug & 1) && (paramIndices + debugParamIndex == indices))
+            // printf("  [%f -> %f^%i = %f] (%i %i) \n", evt[indices[2 + indices[0] + j]], x, currPower, pow(x,
+            // currPower), sumOfIndices, indices[2 + indices[0] + j]);
+        }
+
+        // if ((gpuDebug & 1) && (THREADIDX == 50) && (BLOCKIDX == 3))
+        // if ((BLOCKIDX == internalDebug1) && (THREADIDX == internalDebug2))
+        // printf(") End box %i\n", i);
+        // All threads should hit this at the same time and with the same result. No branching.
+        if(sumOfIndices >= maxDegree)
+            continue;
+
+        fptype coefficient = (p[(indices[coeffNumber++])]); // Coefficient from MINUIT
+        // if ((gpuDebug & 1) && (THREADIDX == 50) && (BLOCKIDX == 3))
+        // if ((BLOCKIDX == internalDebug1) && (THREADIDX == internalDebug2))
+        // if ((1 > (int) floor(0.5 + evt[8])) && (gpuDebug & 1) && (paramIndices + debugParamIndex == indices))
+        // printf("Box %i contributes %f * %f = %f -> %f\n", i, currTerm, p[indices[coeffNumber - 1]],
+        // coefficient*currTerm, (ret + coefficient*currTerm));
+        currTerm *= coefficient;
+//        currIntg *= coefficient;
+        ret += currTerm;
+//	intg+= currIntg;
+    }
+
+    // if ((1 > (int) floor(0.5 + evt[8])) && (gpuDebug & 1) && (paramIndices + debugParamIndex == indices))
+    // printf("Final Bernstein: %f\n", ret);
+
+// if (0 > ret/(intg)) ret = 0;
+// if (0 > ret) ret = -ret;
+// PADUL!!!
+// if (ret/(intg)>1) printf("Error in BernsteinPdf => %f",ret/(intg));
+// if (ret/(intg)<0) printf("Error in BernsteinPdf => %f",ret/(intg));
+//    return ret/(intg);
+//    return ret*ret/(intg*intg);
+    return ret;
+//    return ret;
+}
+ */
+__device__ device_function_ptr ptr_to_Bernstein       = device_Bernstein;
+//__device__ device_function_ptr ptr_to_OffsetBernstein = device_OffsetBernstein;
+//__device__ device_function_ptr ptr_to_MultiBernstein  = device_MultiBernstein;
+
+// Constructor for single-variate Bernstein, with optional zero point.
+// __host__
+// BernsteinPdf::BernsteinPdf(std::string n, Observable _x, std::vector<Variable> weights, unsigned int lowestDegree)
+//     : GooPdf(n, _x) {
+//     std::vector<unsigned int> pindices;
+//     pindices.push_back(lowestDegree);
+// 
+//     for(auto &weight : weights) {
+//         pindices.push_back(registerParameter(weight));
+//     }
+// 
+//     GET_FUNCTION_ADDR(ptr_to_Bernstein);
+// 
+//     initialize(pindices);
+// }
+
+// Constructor for single-variate Bernstein, with optional zero point.
+__host__ BernsteinPdf::BernsteinPdf(
+    std::string n, Observable _x, std::vector<Variable> weights,std::vector<Variable> limits, unsigned int maxDegree)
+    : GooPdf(n, _x) {
+    std::vector<unsigned int> pindices;
+    pindices.push_back(maxDegree);
+
+    for(auto &weight : weights) {
+        pindices.push_back(registerParameter(weight));
+    }
+    for(auto &limit : limits) {
+        pindices.push_back(registerParameter(limit));
+    }
+
+     GET_FUNCTION_ADDR(ptr_to_Bernstein);
+//    GET_FUNCTION_ADDR(ptr_to_OffsetBernstein);
+
+    initialize(pindices);
+}
+
+// // Constructor for multivariate Bernstein.
+// __host__ BernsteinPdf::BernsteinPdf(std::string n,
+//                                       std::vector<Observable> obses,
+//                                       std::vector<Variable> coeffs,
+//                                       std::vector<Variable> offsets,
+//                                       unsigned int maxDegree)
+//     : GooPdf(n) {
+//     unsigned int numParameters = 1;
+// 
+//     // For 1 observable, equal to n = maxDegree + 1.
+//     // For two, n*(n+1)/2, ie triangular number. This generalises:
+//     // 3: Pyramidal number n*(n+1)*(n+2)/(3*2)
+//     // 4: Hyperpyramidal number n*(n+1)*(n+2)*(n+3)/(4*3*2)
+//     // ...
+//     for(unsigned int i = 0; i < obses.size(); ++i) {
+//         registerObservable(obses[i]);
+//         numParameters *= (maxDegree + 1 + i);
+//     }
+// 
+//     for(int i = observables.size(); i > 1; --i)
+//         numParameters /= i;
+// 
+//     while(numParameters > coeffs.size()) {
+//         char varName[100];
+//         sprintf(varName, "%s_extra_coeff_%i", getName().c_str(), static_cast<int>(coeffs.size()));
+// 
+//         coeffs.emplace_back(varName, 0);
+// 
+//         std::cout << "Warning: " << getName() << " created dummy variable " << varName
+//                   << " (fixed at zero) to account for all terms.\n";
+//     }
+// 
+//     while(offsets.size() < obses.size()) {
+//         char varName[100];
+//         sprintf(varName, "%s_extra_offset_%i", getName().c_str(), static_cast<int>(offsets.size()));
+//         offsets.emplace_back(varName, 0);
+//     }
+// 
+//     std::vector<unsigned int> pindices;
+//     pindices.push_back(maxDegree);
+// 
+//     for(auto &offset : offsets) {
+//         pindices.push_back(registerParameter(offset));
+//     }
+// 
+//     for(auto &coeff : coeffs) {
+//         pindices.push_back(registerParameter(coeff));
+//     }
+// 
+//     GET_FUNCTION_ADDR(ptr_to_MultiBernstein);
+//     initialize(pindices);
+// }
+
+__host__ fptype BernsteinPdf::integrate(fptype lo, fptype hi) const {
+//     // This is *still* wrong. (13 Feb 2013.)
+//      unsigned int *indices = host_indices + parameters;
+//      fptype lowestDegree   = indices[1];
+//  
+//      if(center) {
+// 	 hi -= host_params[indices[indices[0]]];
+// 	 lo -= host_params[indices[indices[0]]];
+//      }
+//  
+//      fptype ret = 0;
+//  
+//      for(int i = 2; i < indices[0] + (center ? 0 : 1); ++i) {
+// 	 fptype powerPlusOne = lowestDegree + i - 2;
+// 	 fptype curr	     = pow(hi, powerPlusOne);
+// 	 curr -= pow(lo, powerPlusOne);
+// 	 curr /= powerPlusOne;
+// 	 ret += host_params[indices[i]] * curr;
+//      }
+//  
+//      return ret;
+       return 1;
+}
+// __host__ fptype BernsteinPdf::getCoefficient(int coef) const {
+//     // NB! This function only works for single Bernsteins.
+//     if(1 != observables.size()) {
+//         std::cout << "Warning: getCoefficient method of BernsteinPdf not implemented for multi-dimensional "
+//                      "Bernstein polynomials. Returning zero, which is very likely wrong.\n";
+//         return 0;
+//     }
+// 
+//     unsigned int *indices = host_indices + parameters;
+// 
+//     // True function is, say, ax^2 + bx + c.
+//     // We express this as (a'x^2 + b'x + c')*N.
+//     // So to get the true coefficient, multiply the internal
+//     // one by the normalisation. (In non-PDF cases the normalisation
+//     // equals one, which gives the same result.)
+// 
+//     // Structure is nP lowestdegree c1 c2 c3 nO o1
+//     if(coef < indices[1])
+//         return 0; // Less than least power.
+// 
+//     if(coef > indices[1] + (indices[0] - 1))
+//         return 0; // Greater than max power.
+// 
+//     fptype norm = normalize();
+//     norm        = (1.0 / norm);
+// 
+//     fptype param = host_params[indices[2 + coef - indices[1]]];
+//     return norm * param;
+// }
+} // namespace GooFit
