@@ -31,9 +31,13 @@ cd build; cmake ..  -DGOOFIT_PYTHON=OFF
 
 make -j [insert the number of core/cpu]
 
-the new PDFs are in src/PDFs/mypdf
+the new PDF sources are in src/PDFs/mypdf
 
-the built analysis code is  build/example/test3DBp-2016-G21/testGoofit3DBp-2016
+the built analysis code is in build/example/test3DBp-2016-G21/testGoofit3DBp-2016
+
+the code is in example/test3DBp-2016-G21/testGoofit3DBp-2016.cu
+
+
 
 =================================================================
 
