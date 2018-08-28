@@ -9,14 +9,21 @@ CUDA 8.0, SLC 6.9)
 
 INSTALL
 git clone -b v2.1  git://github.com/GooFit/GooFit.git --recursive
+
 cd GooFit
+
 git fetch && git fetch --tags
+
 git checkout v2.1.1
+
 cd..
 
 wget https://github.com/pdinie831/GooFitRoot-Lifetime-2.1/archive/master.zip
+
 unzip master.zip
+
 cp -r GooFitRoot-Lifetime-2.1-master/* GooFit/
+
 =================================================================
 
 
