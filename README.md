@@ -7,7 +7,6 @@ CUDA 8.0, SLC 6.9)
 
 ============ HOW TO INSTALL =====================================
 
-INSTALL
 git clone -b v2.1  git://github.com/GooFit/GooFit.git --recursive
 
 cd GooFit
