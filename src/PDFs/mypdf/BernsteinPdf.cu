@@ -259,7 +259,7 @@ __device__ fptype device_MultiBernstein(fptype *evt, fptype *p, unsigned int *in
 //       int ii = 0;
 //       int jj = 0;
        fptype func =0.0;
-       fptype intg =0.0;
+//       fptype intg =0.0;
        for(int i = 0; i <= maxDegree1 ; ++i) {
 //       jj = 0;
          for(int j = 0; j <= maxDegree2 ; ++j) {
