@@ -7,6 +7,7 @@ CUDA 8.0, SLC 6.9 with devtoolset-3 and python33)
 
 ============ HOW TO INSTALL =====================================
 
+```bash
 git clone -b v2.1  git://github.com/GooFit/GooFit.git --recursive
 
 cd GooFit
@@ -24,6 +25,7 @@ unzip master.zip
 cp -r GooFitRoot-Lifetime-2.1-master/* GooFit/
 
 cd GooFit/
+```
 
 [Usually I install cmake in the following way:
  
@@ -33,12 +35,13 @@ export PATH=`pwd`/cmake/bin:$PATH (or setenv PATH `pwd`/cmake/bin:$PATH, dependi
 ```
 as suggested in: https://github.com/GooFit/GooFit/blob/virtuals/docs/SYSTEM_INSTALL.md ]
 
-
+```bash
 mkdir build
 
 cd build; cmake ..  -DGOOFIT_PYTHON=OFF
 
 make -j [insert the number of core/cpu available]
+```
 
 the new PDF sources are in src/PDFs/mypdf
 
