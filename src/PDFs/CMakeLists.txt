@@ -11,7 +11,7 @@ set(GOOPDF_HEADERS
     ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/combine/AddPdf.h
     ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/basic/VoigtianPdf.h
     ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/combine/MappedPdf.h
-//    ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/physics/Tddp4Pdf.h
+    ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/physics/Tddp4Pdf.h
     ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/physics/DalitzVetoPdf.h
     ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/basic/JohnsonSUPdf.h
     ${PROJECT_SOURCE_DIR}/include/goofit/PDFs/combine/ProdPdf.h
@@ -73,7 +73,7 @@ if(GOOFIT_SEPARATE_COMP)
         combine/AddPdf.cu
         basic/VoigtianPdf.cu
         combine/MappedPdf.cu
-//        physics/Tddp4Pdf.cu
+        physics/Tddp4Pdf.cu
         physics/DalitzVetoPdf.cu
         basic/JohnsonSUPdf.cu
         combine/ProdPdf.cu
@@ -92,7 +92,7 @@ if(GOOFIT_SEPARATE_COMP)
         basic/ExpPdf.cu
         basic/InterHistPdf.cu
         physics/DalitzPlotPdf.cu
-//        physics/TddpPdf.cu
+        physics/TddpPdf.cu
         basic/ArgusPdf.cu
         basic/ExpGausPdf.cu
         combine/CompositePdf.cu

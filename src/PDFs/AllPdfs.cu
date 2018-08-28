@@ -38,7 +38,7 @@
 #include <physics/MixingTimeResolution_Aux.cu>
 #include <physics/ResonancePdf.cu>
 #include <physics/SpinFactors.cu>
-//#include <physics/Tddp4Pdf.cu>
+#include <physics/Tddp4Pdf.cu>
 #include <physics/TddpPdf.cu>
 #include <physics/ThreeGaussResolution_Aux.cu>
 #include <physics/TruthResolution_Aux.cu>

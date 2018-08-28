@@ -23,6 +23,18 @@ unzip master.zip
 
 cp -r GooFitRoot-Lifetime-2.1-master/* GooFit/
 
+cd GooFit/
+
+mkdir build
+
+cd build; cmake ..  -DGOOFIT_PYTHON=OFF
+
+make -j [insert the number of core/cpu]
+
+the new PDFs are in src/PDFs/mypdf
+
+the built analysis code is  build/example/test3DBp-2016-G21/testGoofit3DBp-2016
+
 =================================================================
 
 
