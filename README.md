@@ -3,7 +3,7 @@ Private version of GooFit, based on GooFit Branch v2.1, Tag v2.1.1
 
 
 GooFitRoot-Lifetime should be compiled with root (it has been tested with ROOT 6.04/18,
-CUDA 8.0, SLC 6.9)
+CUDA 8.0, SLC 6.9 with devtoolset-3 and python33)
 
 ============ HOW TO INSTALL =====================================
 
@@ -24,6 +24,13 @@ unzip master.zip
 cp -r GooFitRoot-Lifetime-2.1-master/* GooFit/
 
 cd GooFit/
+
+[  Usually I install cmake in the following way, suggested by https://github.com/GooFit/GooFit/blob/virtuals/docs/SYSTEM_INSTALL.md :
+
+   mkdir cmake && wget -qO- "https://cmake.org/files/v3.9/cmake-3.9.4-Linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C cmake
+
+   export PATH=`pwd`/cmake/bin:$PATH (or setenv PATH `pwd`/cmake/bin:$PATH, depending on the shell)
+]
 
 mkdir build
 
