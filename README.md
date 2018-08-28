@@ -15,7 +15,7 @@ git fetch && git fetch --tags
 
 git checkout v2.1.1
 
-cd..
+cd ..
 
 wget https://github.com/pdinie831/GooFitRoot-Lifetime-2.1/archive/master.zip
 
