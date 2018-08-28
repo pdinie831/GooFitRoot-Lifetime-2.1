@@ -1,6 +1,22 @@
 # GooFitRoot-Lifetime
-Private version of GooFit, based on GooFit 2.1
-GooFitRoot-Lifetime should be compiled with root (it has been tested with ROOT 6.04/18)
+Private version of GooFit, based on GooFit Branch v2.1, Tag v2.1.1
+
+
+GooFitRoot-Lifetime should be compiled with root (it has been tested with ROOT 6.04/18,
+CUDA 8.0, SLC 6.9)
+
+============ HOW TO INSTALL =====================================
+INSTALL
+git clone -b v2.1  git://github.com/GooFit/GooFit.git --recursive
+cd GooFit
+git fetch && git fetch --tags
+git checkout v2.1.1
+cd..
+
+wget https://github.com/pdinie831/GooFitRoot-Lifetime-2.1/archive/master.zip
+unzip master.zip
+cp -r GooFitRoot-Lifetime-2.1-master/* GooFit/
+=================================================================
 
 
 New PDFs have been added in this private version of Goofit.
