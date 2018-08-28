@@ -29,7 +29,7 @@ mkdir build
 
 cd build; cmake ..  -DGOOFIT_PYTHON=OFF
 
-make -j [insert the number of core/cpu]
+make -j [insert the number of core/cpu available]
 
 the new PDF sources are in src/PDFs/mypdf
 
