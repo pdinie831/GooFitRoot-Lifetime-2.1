@@ -25,13 +25,14 @@ cp -r GooFitRoot-Lifetime-2.1-master/* GooFit/
 
 cd GooFit/
 
-[Usually I install cmake in the following way, suggested in 
-
-https://github.com/GooFit/GooFit/blob/virtuals/docs/SYSTEM_INSTALL.md :
-
+[Usually I install cmake in the following way:
+ 
 mkdir cmake && wget -qO- "https://cmake.org/files/v3.9/cmake-3.9.4-Linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C cmake
 
-export PATH=`pwd`/cmake/bin:$PATH (or setenv PATH `pwd`/cmake/bin:$PATH, depending on the shell)]
+export PATH=`pwd`/cmake/bin:$PATH (or setenv PATH `pwd`/cmake/bin:$PATH, depending on the shell)
+
+as suggested in: https://github.com/GooFit/GooFit/blob/virtuals/docs/SYSTEM_INSTALL.md ]
+
 
 mkdir build
 
