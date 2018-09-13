@@ -2,8 +2,8 @@
 Private version of GooFit, based on GooFit Branch v2.1, Tag v2.1.1
 
 
-GooFitRoot-Lifetime should be compiled with root (it has been tested with ROOT 6.04/18,
-CUDA 8.0, SLC 6.9 with devtoolset-3 and python33)
+GooFitRoot-Lifetime should be compiled with root. It has been tested with ROOT 6.04/18,
+CUDA 8.0, with devtoolset-3 and python33 on SLC6.9 (Tesla K40m) and Centos 7.5 + (GeForce GTX 750 Ti).
 
 ============ HOW TO INSTALL =====================================
 
